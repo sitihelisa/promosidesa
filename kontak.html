@@ -254,6 +254,7 @@
 
 
                 <form
+                    id="formKontak"
                     onsubmit="kirimPesan(event)"
                 >
 
@@ -310,6 +311,12 @@
                     >
                         Kirim Pesan
                     </button>
+
+
+                    <p
+                        id="statusPesan"
+                        style="margin-top: 10px; font-size: 0.9rem;"
+                    ></p>
 
                 </form>
 
@@ -490,6 +497,62 @@
 <!-- JAVASCRIPT -->
 
 <script src="script.js"></script>
+
+<script>
+
+    // URL Google Apps Script (Web App) untuk menyimpan pesan ke Google Sheets
+    const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxJMQAGrlgTuv5k_RFNVTvTiO9g56iOva5gAqRDU9uf7uqQXNNvIEW2UuGW0CC0yR3f6Q/exec";
+
+    function kirimPesan(event) {
+
+        event.preventDefault();
+
+        const form = event.target;
+        const tombol = form.querySelector("button[type='submit']");
+        const status = document.getElementById("statusPesan");
+
+        const teksTombolAsli = tombol.textContent;
+        tombol.textContent = "Mengirim...";
+        tombol.disabled = true;
+        status.textContent = "";
+        status.style.color = "";
+
+        const formData = new FormData();
+        formData.append("nama", document.getElementById("nama").value);
+        formData.append("email", document.getElementById("email").value);
+        formData.append("pesan", document.getElementById("pesan").value);
+
+        fetch(URL_APPS_SCRIPT, {
+            method: "POST",
+            body: formData
+        })
+            .then((response) => response.json())
+            .then((data) => {
+
+                status.style.color = "green";
+                status.textContent = "Pesan berhasil dikirim. Terima kasih!";
+
+                form.reset();
+
+            })
+            .catch((error) => {
+
+                console.error("Gagal mengirim pesan:", error);
+
+                status.style.color = "red";
+                status.textContent = "Gagal mengirim pesan. Silakan coba lagi.";
+
+            })
+            .finally(() => {
+
+                tombol.textContent = teksTombolAsli;
+                tombol.disabled = false;
+
+            });
+
+    }
+
+</script>
 
 </body>
 
