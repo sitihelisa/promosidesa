@@ -273,21 +273,6 @@
                     >
 
 
-                    <!-- EMAIL -->
-
-                    <label for="email">
-                        Email
-                    </label>
-
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        placeholder="Masukkan email Anda"
-                        required
-                    >
-
-
                     <!-- PESAN -->
 
                     <label for="pesan">
@@ -519,7 +504,6 @@
 
         const formData = new FormData();
         formData.append("nama", document.getElementById("nama").value);
-        formData.append("email", document.getElementById("email").value);
         formData.append("pesan", document.getElementById("pesan").value);
 
         fetch(URL_APPS_SCRIPT, {
