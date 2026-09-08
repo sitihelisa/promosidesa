@@ -506,12 +506,15 @@
         formData.append("nama", document.getElementById("nama").value);
         formData.append("pesan", document.getElementById("pesan").value);
 
+        // Catatan: Google Apps Script tidak mengizinkan browser membaca
+        // balasannya (CORS), jadi kita pakai mode "no-cors". Browser tetap
+        // berhasil mengirim data, hanya saja tidak bisa membaca responsnya.
         fetch(URL_APPS_SCRIPT, {
             method: "POST",
+            mode: "no-cors",
             body: formData
         })
-            .then((response) => response.json())
-            .then((data) => {
+            .then(() => {
 
                 status.style.color = "green";
                 status.textContent = "Pesan berhasil dikirim. Terima kasih!";
