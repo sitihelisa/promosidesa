@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Desa Sepadu | Beranda</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* CSS tambahan untuk menyembunyikan/menampilkan area admin */
+        #admin-section {
+            display: none; /* Tersembunyi secara bawaan */
+        }
+    </style>
 </head>
 
 <body>
@@ -23,7 +29,8 @@
             <li><a href="berita.html">Berita</a></li>
             <li><a href="galeri.html">Galeri</a></li>
             <li><a href="kontak.html">Kontak</a></li>
-            <li><a href="#admin-section">Admin</a></li>
+            <!-- Panggilan fungsi JavaScript saat menu Admin diklik -->
+            <li><a href="javascript:void(0)" onclick="aksesAdmin()">Admin</a></li>
         </ul>
 
         <button class="menu-toggle" onclick="toggleMenu()" type="button">
@@ -152,7 +159,7 @@
         </div>
     </section>
 
-    <!-- ================= PANEL ADMIN ================= -->
+    <!-- ================= PANEL ADMIN (TERPROTEKSI PASSWORD) ================= -->
     <section id="admin-section" class="section section-blue">
         <div class="section-title">
             <p>PANEL KONTROL</p>
@@ -169,7 +176,6 @@
                     </tr>
                 </thead>
                 <tbody id="admin-table-body">
-                    <!-- Contoh baris data statis (bisa diisi via JavaScript/Backend) -->
                     <tr>
                         <td style="padding: 10px; border: 1px solid #ddd;">2026-09-17 10:30</td>
                         <td style="padding: 10px; border: 1px solid #ddd;">Budi Santoso</td>
@@ -182,6 +188,10 @@
                     </tr>
                 </tbody>
             </table>
+            
+            <button onclick="keluarAdmin()" style="margin-top: 15px; padding: 8px 16px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Tutup Panel Admin
+            </button>
         </div>
     </section>
 
@@ -202,7 +212,7 @@
             <a href="berita.html">Berita</a>
             <a href="galeri.html">Galeri</a>
             <a href="kontak.html">Kontak</a>
-            <a href="#admin-section">Admin</a>
+            <a href="javascript:void(0)" onclick="aksesAdmin()">Admin</a>
         </div>
 
         <div>
@@ -221,6 +231,26 @@
 
 <!-- ================= JAVASCRIPT ================= -->
 <script src="script.js"></script>
+<script>
+    function aksesAdmin() {
+        // Ganti 'admin123' dengan password yang Anda inginkan
+        const passwordBenar = "admin123"; 
+        
+        const inputPassword = prompt("Masukkan Kata Sandi Admin:");
+
+        if (inputPassword === passwordBenar) {
+            const adminSection = document.getElementById("admin-section");
+            adminSection.style.display = "block"; // Tampilkan panel
+            adminSection.scrollIntoView({ behavior: 'smooth' }); // Gulir otomatis
+        } else if (inputPassword !== null) {
+            alert("Kata sandi salah! Akses ditolak.");
+        }
+    }
+
+    function keluarAdmin() {
+        document.getElementById("admin-section").style.display = "none";
+    }
+</script>
 
 </body>
 </html>
