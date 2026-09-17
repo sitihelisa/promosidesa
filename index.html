@@ -7,10 +7,68 @@
     <title>Desa Sepadu | Beranda</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* CSS tambahan untuk menyembunyikan/menampilkan area admin */
+        /* CSS Tambahan untuk Panel & Modal Login Admin */
         #admin-section {
-            display: none; /* Tersembunyi secara bawaan */
+            display: none; /* Tersembunyi sebelum login */
         }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Modal Box Login */
+        .modal-box {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .modal-box h3 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+
+        .modal-box input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .modal-btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-modal {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-submit { background-color: #0056b3; color: white; }
+        .btn-cancel { background-color: #6c757d; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
     </style>
 </head>
 
@@ -29,8 +87,8 @@
             <li><a href="berita.html">Berita</a></li>
             <li><a href="galeri.html">Galeri</a></li>
             <li><a href="kontak.html">Kontak</a></li>
-            <!-- Panggilan fungsi JavaScript saat menu Admin diklik -->
-            <li><a href="javascript:void(0)" onclick="aksesAdmin()">Admin</a></li>
+            <!-- Pemicu Modal Login Admin -->
+            <li><a href="javascript:void(0)" onclick="bukaModalLogin()">Admin</a></li>
         </ul>
 
         <button class="menu-toggle" onclick="toggleMenu()" type="button">
@@ -162,8 +220,8 @@
     <!-- ================= PANEL ADMIN (TERPROTEKSI PASSWORD) ================= -->
     <section id="admin-section" class="section section-blue">
         <div class="section-title">
-            <p>PANEL KONTROL</p>
-            <h2>Pesan Masuk (Admin)</h2>
+            <p>PANEL KONTROL ADMIN</p>
+            <h2>Database Pesan Masuk</h2>
         </div>
 
         <div class="admin-container" style="overflow-x: auto; max-width: 1000px; margin: 0 auto; padding: 20px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
@@ -176,26 +234,40 @@
                     </tr>
                 </thead>
                 <tbody id="admin-table-body">
-                    <tr>
-                        <td style="padding: 10px; border: 1px solid #ddd;">2026-09-17 10:30</td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">Budi Santoso</td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">Mohon informasi terkait jam pelayanan kantor desa.</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 10px; border: 1px solid #ddd;">2026-09-17 14:15</td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">Siti Rahma</td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">Bagaimana cara mengajukan surat pengantar domisili?</td>
-                    </tr>
+                    <!-- Data dari localStorage / manual dimasukkan ke sini -->
                 </tbody>
             </table>
             
-            <button onclick="keluarAdmin()" style="margin-top: 15px; padding: 8px 16px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                Tutup Panel Admin
-            </button>
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <button onclick="keluarAdmin()" class="btn-modal btn-cancel">
+                    Tutup Panel
+                </button>
+                <button onclick="hapusDatabase()" class="btn-modal btn-danger">
+                    Hapus Semua Pesan
+                </button>
+            </div>
         </div>
     </section>
 
 </main>
+
+<!-- ================= MODAL FORM LOGIN ADMIN ================= -->
+<div id="login-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>Akses Database Admin</h3>
+        <p style="font-size: 13px; color: #666;">Masukkan kata sandi untuk membuka panel admin.</p>
+        
+        <form onsubmit="verifikasiPassword(event)">
+            <input type="password" id="input-password" placeholder="Masukkan Password..." required>
+            <p id="error-msg" style="color: red; font-size: 12px; display: none; margin-top: -5px; margin-bottom: 10px;">Password salah!</p>
+            
+            <div class="modal-btn-group">
+                <button type="button" class="btn-modal btn-cancel" onclick="tutupModalLogin()">Batal</button>
+                <button type="submit" class="btn-modal btn-submit">Masuk</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- ================= FOOTER ================= -->
 <footer>
@@ -212,7 +284,7 @@
             <a href="berita.html">Berita</a>
             <a href="galeri.html">Galeri</a>
             <a href="kontak.html">Kontak</a>
-            <a href="javascript:void(0)" onclick="aksesAdmin()">Admin</a>
+            <a href="javascript:void(0)" onclick="bukaModalLogin()">Admin</a>
         </div>
 
         <div>
@@ -229,26 +301,92 @@
     </div>
 </footer>
 
-<!-- ================= JAVASCRIPT ================= -->
+<!-- ================= JAVASCRIPT LOGIC ================= -->
 <script src="script.js"></script>
 <script>
-    function aksesAdmin() {
-        // Ganti 'admin123' dengan password yang Anda inginkan
-        const passwordBenar = "admin123"; 
-        
-        const inputPassword = prompt("Masukkan Kata Sandi Admin:");
+    // 1. Password Admin (Ubah sesuai keinginanmu)
+    const ADMIN_PASSWORD = "sepadu2026";
 
-        if (inputPassword === passwordBenar) {
-            const adminSection = document.getElementById("admin-section");
-            adminSection.style.display = "block"; // Tampilkan panel
-            adminSection.scrollIntoView({ behavior: 'smooth' }); // Gulir otomatis
-        } else if (inputPassword !== null) {
-            alert("Kata sandi salah! Akses ditolak.");
+    // 2. Data Dummy Awal jika database masih kosong
+    const initialData = [
+        { timestamp: "2026-09-17 10:30", nama: "Budi Santoso", pesan: "Mohon informasi terkait jam pelayanan kantor desa." },
+        { timestamp: "2026-09-17 14:15", nama: "Siti Rahma", pesan: "Bagaimana cara mengajukan surat pengantar domisili?" }
+    ];
+
+    // Buka Modal Popup Login
+    function bukaModalLogin() {
+        document.getElementById("login-modal").style.display = "flex";
+        document.getElementById("input-password").focus();
+    }
+
+    // Tutup Modal Popup Login
+    function tutupModalLogin() {
+        document.getElementById("login-modal").style.display = "none";
+        document.getElementById("input-password").value = "";
+        document.getElementById("error-msg").style.display = "none";
+    }
+
+    // Verifikasi Password
+    function verifikasiPassword(e) {
+        e.preventDefault();
+        const input = document.getElementById("input-password").value;
+
+        if (input === ADMIN_PASSWORD) {
+            tutupModalLogin();
+            bukaDatabase();
+        } else {
+            document.getElementById("error-msg").style.display = "block";
         }
     }
 
+    // Tampilkan Database Pesan ke Tabel Admin
+    function bukaDatabase() {
+        const adminSection = document.getElementById("admin-section");
+        adminSection.style.display = "block";
+        adminSection.scrollIntoView({ behavior: 'smooth' });
+
+        // Ambil data dari localStorage atau pakai data awal
+        let dbPesan = JSON.parse(localStorage.getItem("db_pesan_desasepadu"));
+        if (!dbPesan) {
+            localStorage.setItem("db_pesan_desasepadu", JSON.stringify(initialData));
+            dbPesan = initialData;
+        }
+
+        renderTabel(dbPesan);
+    }
+
+    // Render HTML Tabel
+    function renderTabel(data) {
+        const tbody = document.getElementById("admin-table-body");
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 15px;">Belum ada pesan masuk.</td></tr>`;
+            return;
+        }
+
+        data.forEach(item => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td style="padding: 10px; border: 1px solid #ddd;">${item.timestamp}</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">${item.nama}</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">${item.pesan}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Sembunyikan Panel Admin
     function keluarAdmin() {
         document.getElementById("admin-section").style.display = "none";
+    }
+
+    // Hapus Isi Database
+    function hapusDatabase() {
+        if (confirm("Apakah kamu yakin ingin menghapus semua pesan?")) {
+            localStorage.removeItem("db_pesan_desasepadu");
+            renderTabel([]);
+        }
     }
 </script>
 
