@@ -1,97 +1,208 @@
-// =====================================================
-// BACKEND ADUAN DESA SEPADU - GOOGLE APPS SCRIPT
-// =====================================================
-// 1. Buat Google Sheet baru.
-// 2. Extensions > Apps Script.
-// 3. Tempel kode ini ke Code.gs.
-// 4. Ubah ADMIN_KEY.
-// 5. Deploy > New deployment > Web app.
-//    Execute as: Me
-//    Who has access: Anyone (atau sesuai kebutuhan).
-// 6. Salin URL /exec ke config.js -> APPS_SCRIPT_URL.
-//
-// Kolom sheet otomatis dibuat:
-// Token | Timestamp | Nama | Kontak | Email | Kategori | Lokasi | Isi Aduan | Status | Tanggapan | Waktu Tanggapan
+/* =====================================================
+   DESA SEPADU - GOOGLE APPS SCRIPT
+   Database Aduan -> Google Sheets
+   ===================================================== */
 
-const SHEET_NAME = 'Aduan';
-const ADMIN_KEY = 'GANTI_DENGAN_KUNCI_ADMIN_YANG_KAMU_MAU';
+const SPREADSHEET_ID = '1p2vKGIh6yXu_UC7jzpCz5IV_Sd9HR101b8A3n6gmcll';
+const SHEET_NAME = 'aduan';
+const ADMIN_KEY = 'sepadu2026';
 
-function getSheet_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sh = ss.getSheetByName(SHEET_NAME);
-  if (!sh) sh = ss.insertSheet(SHEET_NAME);
-  if (sh.getLastRow() === 0) {
-    sh.appendRow(['Token','Timestamp','Nama','Kontak','Email','Kategori','Lokasi','Isi Aduan','Status','Tanggapan','Waktu Tanggapan']);
-  }
-  return sh;
+const HEADERS = [
+  'Token',
+  'Timestamp',
+  'Nama',
+  'Kontak',
+  'Email',
+  'Kategori',
+  'Lokasi',
+  'Isi Aduan',
+  'Status',
+  'Tanggapan',
+  'Waktu Tanggapan'
+];
+
+function json(data){
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
-function json_(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+function getSheet(){
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let sheet = ss.getSheetByName(SHEET_NAME);
+
+  // Jika tab di spreadsheet ternyata bernama "Aduan", tetap bisa digunakan.
+  if(!sheet) sheet = ss.getSheetByName('Aduan');
+  if(!sheet) throw new Error('Tab Google Sheet "aduan" tidak ditemukan. Buat/rename tab menjadi aduan.');
+
+  ensureHeaders(sheet);
+  return sheet;
 }
 
-function makeToken_() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  const d = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd');
-  return 'SPD-' + d + '-' + code;
+function ensureHeaders(sheet){
+  const range = sheet.getRange(1,1,1,HEADERS.length);
+  const current = range.getDisplayValues()[0];
+  const same = HEADERS.every((h,i)=>String(current[i]||'').trim()===h);
+
+  if(!same) range.setValues([HEADERS]);
 }
 
-function doGet(e) {
-  const p = e.parameter || {};
-  const action = p.action || 'ping';
-  try {
-    const sh = getSheet_();
-    if (action === 'ping') return json_({ok:true, message:'API Aduan Desa Sepadu aktif'});
+function doGet(e){
+  try{
+    const p = e && e.parameter ? e.parameter : {};
+    const action = String(p.action || '').toLowerCase();
 
-    if (action === 'submit') {
-      if (!p.nama || !p.kontak || !p.kategori || !p.lokasi || !p.aduan) return json_({ok:false,message:'Data wajib belum lengkap'});
-      const token = makeToken_();
-      sh.appendRow([token,new Date(),p.nama,p.kontak,p.email||'',p.kategori,p.lokasi,p.aduan,'Menunggu','', '']);
-      return json_({ok:true,token:token,status:'Menunggu',message:'Aduan berhasil dikirim'});
+    if(action === 'check'){
+      return checkAduan(String(p.token || '').trim().toUpperCase());
     }
 
-    if (action === 'check') {
-      const token = String(p.token || '').trim().toUpperCase();
-      const values = sh.getDataRange().getValues();
-      for (let i=1;i<values.length;i++) {
-        if (String(values[i][0]).toUpperCase() === token) {
-          return json_({ok:true,data:{token:values[i][0],timestamp:values[i][1],nama:values[i][2],kategori:values[i][5],lokasi:values[i][6],aduan:values[i][7],status:values[i][8],tanggapan:values[i][9],waktuTanggapan:values[i][10]}});
-        }
-      }
-      return json_({ok:false,message:'Token tidak ditemukan'});
+    if(action === 'admin'){
+      if(String(p.key || '') !== ADMIN_KEY) return json({ok:false,message:'Password admin salah.'});
+      return getAllAduan();
     }
 
-    if (action === 'list') {
-      if (p.adminKey !== ADMIN_KEY) return json_({ok:false,message:'Kunci admin salah'});
-      const values = sh.getDataRange().getValues();
-      const rows = values.slice(1).map(r => ({token:r[0],timestamp:r[1],nama:r[2],kontak:r[3],email:r[4],kategori:r[5],lokasi:r[6],aduan:r[7],status:r[8],tanggapan:r[9],waktuTanggapan:r[10]}));
-      return json_({ok:true,data:rows});
-    }
-
-    if (action === 'respond') {
-      if (p.adminKey !== ADMIN_KEY) return json_({ok:false,message:'Kunci admin salah'});
-      const token = String(p.token || '').trim().toUpperCase();
-      const values = sh.getDataRange().getValues();
-      for (let i=1;i<values.length;i++) {
-        if (String(values[i][0]).toUpperCase() === token) {
-          sh.getRange(i+1,9).setValue(p.status || 'Diproses');
-          sh.getRange(i+1,10).setValue(p.tanggapan || '');
-          sh.getRange(i+1,11).setValue(new Date());
-          return json_({ok:true,message:'Tanggapan berhasil disimpan'});
-        }
-      }
-      return json_({ok:false,message:'Token tidak ditemukan'});
-    }
-
-    return json_({ok:false,message:'Aksi tidak dikenali'});
-  } catch(err) {
-    return json_({ok:false,message:String(err)});
+    return json({
+      ok:true,
+      service:'Desa Sepadu Aduan API',
+      message:'Apps Script aktif dan terhubung ke Google Sheets.'
+    });
+  }catch(err){
+    return json({ok:false,message:String(err.message || err)});
   }
 }
 
-function doPost(e) {
-  // Mendukung POST sederhana jika nanti kamu ingin menggunakannya.
-  return doGet(e);
+function doPost(e){
+  try{
+    if(!e || !e.postData || !e.postData.contents){
+      throw new Error('Data POST kosong.');
+    }
+
+    const data = JSON.parse(e.postData.contents);
+    const action = String(data.action || '').toLowerCase();
+
+    if(action === 'create') return createAduan(data);
+    if(action === 'update') return updateAduan(data);
+
+    throw new Error('Action tidak dikenali. Gunakan create atau update.');
+  }catch(err){
+    return json({ok:false,message:String(err.message || err)});
+  }
+}
+
+function createAduan(data){
+  const required = ['token','nama','kontak','kategori','lokasi','isiAduan'];
+  required.forEach(key=>{
+    if(!String(data[key] || '').trim()) throw new Error('Field wajib kosong: ' + key);
+  });
+
+  const sheet = getSheet();
+  const token = String(data.token).trim().toUpperCase();
+
+  // Cegah token ganda.
+  if(findRowByToken(sheet, token) !== -1){
+    throw new Error('Token sudah ada. Silakan kirim ulang aduan.');
+  }
+
+  sheet.appendRow([
+    token,
+    data.timestamp ? new Date(data.timestamp) : new Date(),
+    String(data.nama || '').trim(),
+    String(data.kontak || '').trim(),
+    String(data.email || '').trim(),
+    String(data.kategori || '').trim(),
+    String(data.lokasi || '').trim(),
+    String(data.isiAduan || '').trim(),
+    'Menunggu',
+    '',
+    ''
+  ]);
+
+  return json({ok:true,message:'Aduan berhasil disimpan.',token:token});
+}
+
+function checkAduan(token){
+  if(!token) return json({ok:false,message:'Token belum diisi.'});
+
+  const sheet = getSheet();
+  const row = findRowByToken(sheet, token);
+  if(row === -1) return json({ok:true,data:null});
+
+  return json({ok:true,data:rowToObject(sheet,row)});
+}
+
+function getAllAduan(){
+  const sheet = getSheet();
+  const lastRow = sheet.getLastRow();
+
+  if(lastRow < 2) return json({ok:true,data:[]});
+
+  const values = sheet.getRange(2,1,lastRow-1,HEADERS.length).getDisplayValues();
+  const data = values.map(row=>{
+    const obj={};
+    HEADERS.forEach((h,i)=>{
+      obj[keyFromHeader(h)] = row[i] || '';
+    });
+    return obj;
+  }).filter(x=>x.token);
+
+  return json({ok:true,data:data});
+}
+
+function updateAduan(data){
+  if(String(data.key || '') !== ADMIN_KEY){
+    return json({ok:false,message:'Password admin salah.'});
+  }
+
+  const token = String(data.token || '').trim().toUpperCase();
+  if(!token) throw new Error('Token aduan belum diisi.');
+
+  const sheet = getSheet();
+  const row = findRowByToken(sheet, token);
+  if(row === -1) throw new Error('Token aduan tidak ditemukan.');
+
+  const status = String(data.status || 'Menunggu').trim();
+  const allowed = ['Menunggu','Diproses','Selesai','Ditolak'];
+  if(allowed.indexOf(status) === -1) throw new Error('Status tidak valid.');
+
+  const tanggapan = String(data.tanggapan || '').trim();
+  sheet.getRange(row,9,1,3).setValues([[status,tanggapan,new Date()]]);
+
+  return json({ok:true,message:'Tanggapan berhasil disimpan.'});
+}
+
+function findRowByToken(sheet, token){
+  const lastRow = sheet.getLastRow();
+  if(lastRow < 2) return -1;
+
+  const tokens = sheet.getRange(2,1,lastRow-1,1).getDisplayValues();
+  for(let i=0;i<tokens.length;i++){
+    if(String(tokens[i][0]).trim().toUpperCase() === token) return i+2;
+  }
+  return -1;
+}
+
+function rowToObject(sheet,row){
+  const values = sheet.getRange(row,1,1,HEADERS.length).getDisplayValues()[0];
+  const obj={};
+  HEADERS.forEach((h,i)=>{
+    obj[keyFromHeader(h)] = values[i] || '';
+  });
+  return obj;
+}
+
+function keyFromHeader(header){
+  const map={
+    'Token':'token',
+    'Timestamp':'timestamp',
+    'Nama':'nama',
+    'Kontak':'kontak',
+    'Email':'email',
+    'Kategori':'kategori',
+    'Lokasi':'lokasi',
+    'Isi Aduan':'isiAduan',
+    'Status':'status',
+    'Tanggapan':'tanggapan',
+    'Waktu Tanggapan':'waktuTanggapan'
+  };
+  return map[header] || header;
 }
