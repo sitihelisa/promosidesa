@@ -1,39 +1,47 @@
-// ===============================
-// DESA SEPADU - SCRIPT UTAMA
-// ===============================
-function toggleMenu(){const n=document.querySelector('.nav-menu');if(n)n.classList.toggle('active')}
-document.querySelectorAll('.nav-menu a').forEach(a=>a.addEventListener('click',()=>document.querySelector('.nav-menu')?.classList.remove('active')));
 
-function openImage(src){const m=document.getElementById('imageModal'),i=document.getElementById('modalImage');if(m&&i){i.src=src;m.style.display='flex'}}
-function closeImage(){const m=document.getElementById('imageModal');if(m)m.style.display='none'}
-document.addEventListener('click',e=>{const m=document.getElementById('imageModal');if(m&&e.target===m)closeImage()});
+function toggleMenu(){document.querySelector('.nav-menu')?.classList.toggle('open')}
+document.addEventListener('DOMContentLoaded',()=>{const path=location.pathname.split('/').pop()||'index.html';document.querySelectorAll('.nav-menu a').forEach(a=>{if(a.getAttribute('href')===path)a.classList.add('active')});});
+function openImage(src){const m=document.getElementById('imageModal');const i=document.getElementById('modalImage');if(m&&i){i.src=src;m.classList.add('open')}}
+function closeImage(){document.getElementById('imageModal')?.classList.remove('open')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeImage()});
-
-function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
-function apiReady(){return typeof APP_CONFIG!=='undefined' && APP_CONFIG.APPS_SCRIPT_URL && APP_CONFIG.APPS_SCRIPT_URL.trim()}
-function apiUrl(params){const u=new URL(APP_CONFIG.APPS_SCRIPT_URL);Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));return u.toString()}
-async function apiGet(params){const r=await fetch(apiUrl(params),{method:'GET'});return await r.json()}
-
-function kirimPesan(e){e.preventDefault();const nama=document.getElementById('namaPesan').value.trim();const email=document.getElementById('emailPesan').value.trim();const pesan=document.getElementById('pesanUmum').value.trim();const st=document.getElementById('statusPesan');if(st){st.textContent=`Terima kasih, ${nama}. Pesan umum siap diproses. Untuk aduan yang perlu token, gunakan formulir Aduan.`;st.style.color='#b45880'}document.getElementById('namaPesan').value='';document.getElementById('emailPesan').value='';document.getElementById('pesanUmum').value=''}
-
-function demoStore(){return JSON.parse(localStorage.getItem('aduan_desasepadu')||'[]')}
-function demoSave(rows){localStorage.setItem('aduan_desasepadu',JSON.stringify(rows))}
-function makeDemoToken(){const d=new Date();const ds=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');return 'SPD-'+ds+'-'+Math.random().toString(36).substring(2,8).toUpperCase()}
-
-async function submitAduan(e){e.preventDefault();const data={nama:document.getElementById('aduanNama').value.trim(),kontak:document.getElementById('aduanKontak').value.trim(),email:document.getElementById('aduanEmail').value.trim(),kategori:document.getElementById('aduanKategori').value,lokasi:document.getElementById('aduanLokasi').value.trim(),aduan:document.getElementById('aduanIsi').value.trim()};const box=document.getElementById('hasilAduan');box.innerHTML='<div class="status-card">Sedang mengirim aduan...</div>';
-if(apiReady()){
- try{const r=await apiGet({action:'submit',...data});if(!r.ok)throw new Error(r.message||'Gagal');box.innerHTML=`<div class="status-card"><strong>Aduan berhasil dikirim.</strong><br>Simpan token berikut untuk mengecek jawaban:<br><span class="token">${esc(r.token)}</span><p class="helper" style="margin:10px 0 0">Status awal: ${esc(r.status||'Menunggu')}</p></div>`;document.getElementById('aduanForm').reset();}catch(err){box.innerHTML=`<div class="status-card">Gagal terhubung ke Google Sheet. ${esc(err.message)}. Pastikan URL Apps Script sudah benar.</div>`}
-}else{
- const token=makeDemoToken();const rows=demoStore();rows.push({...data,token,timestamp:new Date().toLocaleString('id-ID'),status:'Menunggu',tanggapan:'',waktuTanggapan:''});demoSave(rows);box.innerHTML=`<div class="status-card"><strong>Mode demo: aduan tersimpan di browser ini.</strong><br>Simpan token:<br><span class="token">${token}</span><p class="helper" style="margin:10px 0 0">Untuk database sungguhan, isi APPS_SCRIPT_URL di config.js.</p></div>`;document.getElementById('aduanForm').reset();}
+function toast(msg){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200)}
+function makeToken(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i=0;i<6;i++)r+=chars[Math.floor(Math.random()*chars.length)];const d=new Date();const ds=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');return `SPD-${ds}-${r}`}
+function getLocalAduan(){try{return JSON.parse(localStorage.getItem('sepadu_aduan')||'[]')}catch{return[]}}
+function saveLocalAduan(x){localStorage.setItem('sepadu_aduan',JSON.stringify(x))}
+async function postToSheet(data){if(!window.APP_SCRIPT_URL)return {ok:true,local:true};const r=await fetch(window.APP_SCRIPT_URL,{method:'POST',body:JSON.stringify(data)});return await r.json().catch(()=>({ok:r.ok}))}
+async function submitAduan(e){e.preventDefault();const form=e.target;const data={action:'create',token:makeToken(),timestamp:new Date().toISOString(),nama:aduanNama.value.trim(),kontak:aduanKontak.value.trim(),email:aduanEmail.value.trim(),kategori:aduanKategori.value,lokasi:aduanLokasi.value.trim(),isiAduan:aduanIsi.value.trim(),status:'Menunggu',tanggapan:'',waktuTanggapan:''};try{const arr=getLocalAduan();arr.push(data);saveLocalAduan(arr);const result=await postToSheet(data);const box=document.getElementById('hasilAduan');box.innerHTML=`<div class="token-box"><div>✅ Aduan berhasil dikirim.</div><div class="helper">Simpan token ini untuk mengecek jawaban:</div><div class="token">${data.token}</div>${result.local?'<div class="helper">Mode demo: data tersimpan di browser ini. Isi URL Apps Script agar masuk ke Google Sheet.</div>':''}</div>`;form.reset();}catch(err){toast('Aduan disimpan lokal, tetapi koneksi Google Sheet gagal.')}}
+async function cekAduan(){const token=(document.getElementById('trackingToken')?.value||'').trim().toUpperCase();const box=document.getElementById('hasilTracking');if(!token){box.innerHTML='<div class="status-card">Masukkan token terlebih dahulu.</div>';return}let data=null;if(window.APP_SCRIPT_URL){try{const r=await fetch(window.APP_SCRIPT_URL+'?action=check&token='+encodeURIComponent(token));const j=await r.json();data=j.data||j;}catch{}}if(!data){data=getLocalAduan().find(x=>x.token===token)}box.innerHTML=data?`<div class="status-card"><strong>${data.kategori||'Aduan'}</strong><p>${data.isiAduan||data.isi||''}</p><span class="badge">${data.status||'Menunggu'}</span><p><strong>Tanggapan admin:</strong><br>${data.tanggapan||'Belum ada tanggapan. Silakan cek kembali nanti.'}</p></div>`:'<div class="status-card">Token tidak ditemukan. Periksa kembali token yang dimasukkan.</div>'}
+function kirimPesan(e){e.preventDefault();toast('Pesan umum siap dikirim. Hubungkan endpoint email jika diperlukan.');e.target.reset()}
+function adminLogin(e){e.preventDefault();const key=document.getElementById('adminKey').value;if(key!==window.ADMIN_KEY){document.getElementById('loginMsg').textContent='Password admin salah.';return}sessionStorage.setItem('sepadu_admin','1');showAdmin()}
+function showAdmin(){document.getElementById('adminLogin')?.remove();const app=document.getElementById('adminApp');if(!app)return;app.style.display='block';renderAdmin()}
+function logoutAdmin(){sessionStorage.removeItem('sepadu_admin');location.reload()}
+async function renderAdmin(){
+ const list=document.getElementById('adminList');
+ if(!list)return;
+ list.innerHTML='<div class="empty">Memuat aduan...</div>';
+ let data=[];
+ if(window.APP_SCRIPT_URL){
+  try{
+   const r=await fetch(window.APP_SCRIPT_URL+'?action=admin&key='+encodeURIComponent(window.ADMIN_KEY));
+   const j=await r.json();
+   if(j.ok && Array.isArray(j.data)) data=j.data;
+  }catch(e){}
+ }
+ if(!data.length) data=getLocalAduan();
+ if(!data.length){list.innerHTML='<div class="empty">Belum ada aduan.</div>';return;}
+ list.innerHTML=data.map((x,i)=>`<div class="admin-item"><h3>${x.token||''} <span class="badge">${x.status||'Menunggu'}</span></h3><p><strong>${x.nama||''}</strong> · ${x.kontak||''} · ${x.kategori||''}</p><p><strong>Lokasi:</strong> ${x.lokasi||''}</p><p><strong>Aduan:</strong> ${x.isiAduan||''}</p><label class="field"><span><strong>Tanggapan admin</strong></span><textarea id="resp-${i}">${x.tanggapan||''}</textarea></label><div class="admin-actions" style="margin-top:10px"><select id="stat-${i}"><option ${x.status==='Menunggu'?'selected':''}>Menunggu</option><option ${x.status==='Diproses'?'selected':''}>Diproses</option><option ${x.status==='Selesai'?'selected':''}>Selesai</option><option ${x.status==='Ditolak'?'selected':''}>Ditolak</option></select><button onclick='saveResponseRemote(${JSON.stringify(x) .replace(/'/g,"&#39;")},${i})'>Simpan Tanggapan</button></div></div>`).join('');
 }
-
-async function cekAduan(){const token=document.getElementById('trackingToken').value.trim().toUpperCase();const box=document.getElementById('hasilTracking');if(!token){box.innerHTML='<div class="status-card">Masukkan token terlebih dahulu.</div>';return}if(apiReady()){try{const r=await apiGet({action:'check',token});if(!r.ok)throw new Error(r.message||'Token tidak ditemukan');const d=r.data;box.innerHTML=`<div class="status-card"><span class="token">${esc(d.token)}</span><p><strong>Status:</strong> <span class="status-badge">${esc(d.status)}</span></p><p><strong>Kategori:</strong> ${esc(d.kategori)}</p><p><strong>Lokasi:</strong> ${esc(d.lokasi)}</p><p><strong>Aduan:</strong> ${esc(d.aduan)}</p><p><strong>Tanggapan:</strong> ${esc(d.tanggapan||'Belum ada tanggapan')}</p></div>`}catch(err){box.innerHTML=`<div class="status-card">${esc(err.message)}</div>`}}else{const d=demoStore().find(x=>x.token===token);if(!d){box.innerHTML='<div class="status-card">Token tidak ditemukan di browser ini.</div>';return}box.innerHTML=`<div class="status-card"><span class="token">${esc(d.token)}</span><p><strong>Status:</strong> <span class="status-badge">${esc(d.status)}</span></p><p><strong>Kategori:</strong> ${esc(d.kategori)}</p><p><strong>Lokasi:</strong> ${esc(d.lokasi)}</p><p><strong>Aduan:</strong> ${esc(d.aduan)}</p><p><strong>Tanggapan:</strong> ${esc(d.tanggapan||'Belum ada tanggapan')}</p></div>`}}
-
-function loginAdmin(){const key=document.getElementById('adminKey').value; if(!key){document.getElementById('adminLoginStatus').textContent='Masukkan kunci admin.';return}sessionStorage.setItem('sepadu_admin_key',key);document.getElementById('adminPanel').style.display='block';document.getElementById('adminLoginStatus').textContent='Login tersimpan di sesi browser ini.';muatAduanAdmin()}
-function logoutAdmin(){sessionStorage.removeItem('sepadu_admin_key');document.getElementById('adminPanel').style.display='none';document.getElementById('adminKey').value='';document.getElementById('adminLoginStatus').textContent='Anda sudah keluar.'}
-
-async function muatAduanAdmin(){const tbody=document.getElementById('adminTbody');if(!tbody)return;tbody.innerHTML='<tr><td colspan="9">Memuat data...</td></tr>';if(apiReady()){const key=sessionStorage.getItem('sepadu_admin_key')||'';try{const r=await apiGet({action:'list',adminKey:key});if(!r.ok)throw new Error(r.message||'Gagal');renderAdmin(r.data)}catch(err){tbody.innerHTML=`<tr><td colspan="9">${esc(err.message)}</td></tr>`}}else{renderAdmin(demoStore())}}
-function renderAdmin(rows){const tbody=document.getElementById('adminTbody');if(!rows.length){tbody.innerHTML='<tr><td colspan="9">Belum ada aduan.</td></tr>';return}tbody.innerHTML=rows.map(d=>`<tr><td><strong>${esc(d.token)}</strong></td><td>${esc(d.timestamp)}</td><td>${esc(d.nama)}<br>${esc(d.kontak)}</td><td>${esc(d.kategori)}</td><td>${esc(d.lokasi)}</td><td>${esc(d.aduan)}</td><td>${esc(d.status)}</td><td>${esc(d.tanggapan||'—')}</td><td><div class="admin-actions"><select id="st-${esc(d.token)}"><option ${d.status==='Menunggu'?'selected':''}>Menunggu</option><option ${d.status==='Diproses'?'selected':''}>Diproses</option><option ${d.status==='Selesai'?'selected':''}>Selesai</option><option ${d.status==='Ditolak'?'selected':''}>Ditolak</option></select><input id="tg-${esc(d.token)}" placeholder="Tanggapan" value="${esc(d.tanggapan||'')}" style="min-width:180px"><button onclick="simpanTanggapan('${esc(d.token)}')">Simpan</button></div></td></tr>`).join('')}
-async function simpanTanggapan(token){const status=document.getElementById('st-'+token).value;const tanggapan=document.getElementById('tg-'+token).value.trim();if(apiReady()){const key=sessionStorage.getItem('sepadu_admin_key')||'';try{const r=await apiGet({action:'respond',adminKey:key,token,status,tanggapan});alert(r.message||'Tersimpan');if(r.ok)muatAduanAdmin()}catch(err){alert(err.message)}}else{const rows=demoStore();const i=rows.findIndex(x=>x.token===token);if(i>=0){rows[i].status=status;rows[i].tanggapan=tanggapan;rows[i].waktuTanggapan=new Date().toLocaleString('id-ID');demoSave(rows);muatAduanAdmin();alert('Tanggapan tersimpan di mode demo.')}}}
-
-document.addEventListener('DOMContentLoaded',()=>{if(location.pathname.endsWith('admin.html')&&sessionStorage.getItem('sepadu_admin_key')){document.getElementById('adminPanel').style.display='block';document.getElementById('adminKey').value=sessionStorage.getItem('sepadu_admin_key');muatAduanAdmin()}});
+async function saveResponseRemote(x,i){
+ const status=document.getElementById('stat-'+i).value;
+ const tanggapan=document.getElementById('resp-'+i).value.trim();
+ const payload={action:'update',key:window.ADMIN_KEY,token:x.token,status,tanggapan,waktuTanggapan:new Date().toISOString()};
+ try{
+  const result=await postToSheet(payload);
+  if(!result.ok) throw new Error(result.message||'Gagal');
+  toast('Tanggapan berhasil disimpan ke Google Sheet.');
+  renderAdmin();
+ }catch(e){toast('Gagal menyimpan tanggapan ke Google Sheet.');}
+}
+window.APP_SCRIPT_URL){try{await postToSheet({action:'update',...x})}catch{}}renderAdmin();toast('Tanggapan disimpan.')}
+window.APP_SCRIPT_URL=typeof APP_SCRIPT_URL==='string'?APP_SCRIPT_URL:'';
+window.ADMIN_KEY=typeof ADMIN_KEY==='string'?ADMIN_KEY:'sepadu2026';

@@ -1,28 +1,14 @@
-# Website Desa Sepadu - Pink Pastel
+# Website Desa Sepadu – Pink Pastel
 
-Website statis Desa Sepadu dengan halaman Beranda, Profil Desa, Berita, Galeri, Kontak & Aduan, serta Admin Aduan.
+Website statis Desa Sepadu dengan halaman Beranda, Profil, Berita, Galeri, Kontak & Aduan, serta Admin.
 
-## Foto
-Foto baru sudah diberi nama sederhana agar mudah dipanggil dari HTML:
-- `balai-desa-baru.jpg`
-- `lingkungan-desa.jpg`
-- `gerbang-desa-sepadu.jpg`
-- `sawah-baru.jpg`
-- `gotong-royong-sungai.jpg`
-- `masjid-al-falah.jpg`
+## Upload ke GitHub Pages
+1. Ekstrak ZIP.
+2. Upload semua file di folder ini ke repository GitHub Pages kamu.
+3. Pastikan `index.html`, `style.css`, `script.js`, `config.js`, `favicon.svg`, dan semua foto berada pada folder yang sama.
+4. Jika GitHub masih menampilkan desain lama, lakukan hard refresh: `Ctrl + F5`.
 
-Foto lama juga tetap disertakan dan di-HD-kan.
+## Google Sheet
+Buat tab `Aduan` dengan header: Token, Timestamp, Nama, Kontak, Email, Kategori, Lokasi, Isi Aduan, Status, Tanggapan, Waktu Tanggapan.
 
-## Aduan + Google Sheet
-Form aduan memakai field: Nama, No. WhatsApp/Telepon, Email, Kategori, Lokasi, Isi Aduan. Sistem menghasilkan token untuk pelacakan. Struktur kolom Google Sheet tersedia di `GOOGLE-SHEET.md`. Backend Apps Script tersedia di `Code.gs`.
-
-## Cara mengaktifkan database
-1. Buat Google Sheet.
-2. Buka Extensions > Apps Script.
-3. Salin `Code.gs`.
-4. Ubah `ADMIN_KEY`.
-5. Deploy sebagai Web app.
-6. Tempel URL `/exec` ke `config.js` pada `APPS_SCRIPT_URL`.
-7. Upload semua file ke GitHub Pages.
-
-Jika `APPS_SCRIPT_URL` masih kosong, website otomatis menggunakan mode demo/localStorage.
+Isi URL Web App Apps Script di `config.js` pada variabel `APP_SCRIPT_URL`.

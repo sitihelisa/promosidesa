@@ -1,12 +1,2 @@
-// ================================
-// KONFIGURASI DESA SEPADU
-// ================================
-// Setelah Google Apps Script selesai di-deploy sebagai Web App,
-// tempel URL /exec di bawah ini. Jika dikosongkan, website tetap
-// berjalan dalam MODE DEMO menggunakan localStorage browser.
-const APP_CONFIG = {
-  APPS_SCRIPT_URL: "",
-  MAP_QUERY: "Desa Sepadu, Kecamatan Semparuk, Kabupaten Sambas, Kalimantan Barat",
-  MAP_LAT: 1.1475,
-  MAP_LNG: 109.0734
-};
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0xx_Iwm7CY58NNZnU0whcOzjzFUV9cq3iUpmPK1LZjnPEmtl08m8iE-rPYHE8dM6djw/exec';
+const ADMIN_KEY = 'sepadu2026';
