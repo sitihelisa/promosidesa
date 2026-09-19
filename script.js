@@ -8,7 +8,7 @@
 
 // URL Apps Script Web App Desa Sepadu
 const APP_SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbzcpL9Q14AYzIcRM070Z0Zh3MfBRZJyJF0MpAxcjMYwx8HsSjS40alMpFVbxJRGJs5GjQ/exec";
+"https://script.google.com/macros/s/AKfycbzES78HYbTwCbA_CbqUUZqs5GZB2uRH-6Y4Qo6y4Q832G81j2SdYOET6mDl6QP6QReh/exec";
 
 // Password admin
 const ADMIN_KEY = "sepadu2026";
