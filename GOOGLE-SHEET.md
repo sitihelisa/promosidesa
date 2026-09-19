@@ -30,6 +30,6 @@ File `Code.gs` pada paket ini berisi kode Apps Script lengkap.
 
 URL Web App yang sudah dipasang di website:
 
-`https://script.google.com/macros/s/AKfycbx0xx_Iwm7CY58NNZnU0whcOzjzFUV9cq3iUpmPK1LZjnPEmtl08m8iE-rPYHE8dM6djw/exec`
+`https://script.google.com/macros/s/AKfycbzcpL9Q14AYzIcRM070Z0Zh3MfBRZJyJF0MpAxcjMYwx8HsSjS40alMpFVbxJRGJs5GjQ/exec`
 
 Jika kamu mengubah kode Apps Script setelah deployment, lakukan **Deploy → Manage deployments → Edit → New version → Deploy** agar versi Web App ikut diperbarui.

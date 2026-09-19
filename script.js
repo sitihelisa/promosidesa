@@ -64,7 +64,7 @@ function saveLocalAduan(x){
 function getAppScriptUrl(){
   const url = String(window.APP_SCRIPT_URL || '').trim();
   if(!url || url.includes('GANTI')){
-    throw new Error('URL Apps Script belum diisi di config.js.');
+    throw new Error('URL Apps Script belum tersedia. Pastikan config.js terbaru sudah ter-upload.');
   }
   return url;
 }
@@ -340,9 +340,9 @@ function escapeHtml(value){
     .replaceAll("'",'&#039;');
 }
 
-window.APP_SCRIPT_URL=typeof APP_SCRIPT_URL==='string'?APP_SCRIPT_URL:'';
-window.GOOGLE_SHEET_ID=typeof GOOGLE_SHEET_ID==='string'?GOOGLE_SHEET_ID:'';
-window.ADMIN_KEY=typeof ADMIN_KEY==='string'?ADMIN_KEY:'';
+// config.js memuat APP_SCRIPT_URL dan ADMIN_KEY ke window.
+window.APP_SCRIPT_URL = String(window.APP_SCRIPT_URL || '').trim();
+window.ADMIN_KEY = String(window.ADMIN_KEY || '').trim();
 
 if(document.getElementById('adminApp') && sessionStorage.getItem('sepadu_admin')==='1'){
   showAdmin();

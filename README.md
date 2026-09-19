@@ -1,27 +1,17 @@
-# Website Desa Sepadu – Pink Pastel
+# Desa Sepadu - Terhubung Google Sheets
 
-Website statis Desa Sepadu dengan halaman Beranda, Profil, Berita, Galeri, Kontak & Aduan, serta Admin.
+Paket ini sudah memakai URL Apps Script dan Google Spreadsheet yang diberikan.
 
-## Fitur Aduan
-- Formulir aduan tersimpan ke Google Sheets.
-- Setiap aduan mendapatkan token `SPD-YYYYMMDD-XXXXXX`.
-- Masyarakat dapat mengecek status menggunakan token.
-- Admin dapat login dan melihat semua aduan dari Google Sheets.
-- Admin dapat mengubah status menjadi Menunggu / Diproses / Selesai / Ditolak.
-- Admin dapat menulis tanggapan yang langsung disimpan ke Google Sheets.
+## Penting setelah upload
+1. Upload/replace SEMUA file di folder ini ke repository GitHub Pages.
+2. Pastikan `config.js` dan `script.js` ikut terganti.
+3. Karena script memakai `?v=20260919`, browser dipaksa mengambil versi JS baru.
+4. Di Apps Script, gunakan `Code.gs` dari paket ini lalu Deploy > Manage deployments > Edit > New version > Web app > Execute as Me > Who has access: Anyone.
+5. URL Web App harus berakhiran `/exec` dan sama dengan URL di `config.js`.
+6. Tab spreadsheet harus bernama `aduan`.
 
-## Upload ke GitHub Pages
-1. Ekstrak ZIP.
-2. Upload semua file di folder `desa` ke repository GitHub Pages.
-3. Pastikan `index.html`, `style.css`, `script.js`, `config.js`, `favicon.svg`, dan semua foto berada pada folder yang sama.
-4. Jika GitHub masih menampilkan desain lama, lakukan hard refresh: `Ctrl + F5`.
-
-## Koneksi Google Sheets
-Spreadsheet yang digunakan:
+Spreadsheet ID:
 `1p2vKGIh6yXu_UC7jzpCz5IV_Sd9HR101b8A3n6gmcll`
 
-Tab:
-`aduan`
-
-Kode Apps Script lengkap ada di `Code.gs`.
-Ikuti langkah di `GOOGLE-SHEET.md` untuk memasang/deploy Web App.
+URL Apps Script:
+`https://script.google.com/macros/s/AKfycbzcpL9Q14AYzIcRM070Z0Zh3MfBRZJyJF0MpAxcjMYwx8HsSjS40alMpFVbxJRGJs5GjQ/exec`

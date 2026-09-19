@@ -1,13 +1,4 @@
-/* =====================================================
-   KONFIGURASI DESA SEPADU
-   ===================================================== */
-
-// URL Web App Google Apps Script yang sudah kamu deploy.
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0xx_Iwm7CY58NNZnU0whcOzjzFUV9cq3iUpmPK1LZjnPEmtl08m8iE-rPYHE8dM6djw/exec';
-
-// ID Google Spreadsheet Database Desa Sepadu.
-// ID ini dipakai oleh Apps Script, bukan dikirim langsung dari browser.
-const GOOGLE_SHEET_ID = '1p2vKGIh6yXu_UC7jzpCz5IV_Sd9HR101b8A3n6gmcll';
-
-// Password admin. Harus sama dengan ADMIN_KEY di Code.gs Apps Script.
-const ADMIN_KEY = 'sepadu2026';
+// DESA SEPADU - KONFIGURASI KONEKSI ADUAN
+// URL Web App Apps Script terbaru
+window.APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcpL9Q14AYzIcRM070Z0Zh3MfBRZJyJF0MpAxcjMYwx8HsSjS40alMpFVbxJRGJs5GjQ/exec';
+window.ADMIN_KEY = 'sepadu2026';
