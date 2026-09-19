@@ -44,4 +44,3 @@ async function saveResponseRemote(x,i){
 }
 window.APP_SCRIPT_URL){try{await postToSheet({action:'update',...x})}catch{}}renderAdmin();toast('Tanggapan disimpan.')}
 window.APP_SCRIPT_URL=typeof APP_SCRIPT_URL==='string'?APP_SCRIPT_URL:'';
-window.ADMIN_KEY=typeof ADMIN_KEY==='string'?ADMIN_KEY:'sepadu2026';
